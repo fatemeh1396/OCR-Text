@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#171a22">
+  <meta name="description" content="ابزار استخراج متن چاپی فارسی و انگلیسی از تصویر">
+  <link rel="icon" type="image/png" href="./assets/favicon/OCR.png">
+  <link rel="apple-touch-icon" href="./assets/favicon/OCR.png">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <title>OCR | استخراج متن</title>
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <main class="app-shell">
+    <header class="topbar">
+      <a class="brand" href="./" aria-label="OCR - استخراج متن">
+        <span class="brand-icon-frame"><img src="./assets/favicon/OCR.png" alt="آیکون OCR" class="brand-icon"></span>
+        <span><b class="brand-title"><span dir="ltr">OCR</span> <em>استخراج متن</em></b><small>استخراج متن چاپی فارسی و انگلیسی</small></span>
+      </a>
+      <div class="badges">
+        <span id="networkBadge" class="badge neutral">بررسی اتصال…</span>
+        <span id="engineBadge" class="badge neutral">موتور آماده نیست</span>
+      </div>
+    </header>
+
+    <section class="intro panel">
+      <div>
+        <p class="eyebrow">ابزار تخصصی استخراج متن چاپی</p>
+        <h1>عکس را به متن قابل ویرایش تبدیل کن</h1>
+        <p class="intro-copy">این ابزار برای استخراج متن چاپی فارسی و انگلیسی از تصویر ساخته شده است. اعدادِ داخل متن نیز ممکن است خوانده شوند، اما این نسخه ابزار تخصصی تشخیص شماره‌ها، رشته‌های عددی یا فرمول‌های ریاضی نیست.</p>
+      </div>
+      <div class="intro-tags"><span>متن چاپی فارسی</span><span>Printed English</span><span>بدون API پولی</span><span>مدل فشردهٔ best-int</span></div>
+    </section>
+
+    <section class="workspace">
+      <article class="panel input-panel">
+        <div class="section-heading"><h2>۱. تصویر</h2><span class="step">ورودی</span></div>
+        <input id="fileInput" type="file" accept="image/*" hidden>
+        <div id="dropZone" class="drop-zone" tabindex="0" role="button" aria-label="انتخاب یا رها کردن تصویر">
+          <div id="emptyState" class="empty-state">
+            <div class="upload-symbol">▧</div>
+            <b>تصویر را اینجا رها کن</b>
+            <span>یا برای انتخاب کلیک کن · امکان چسباندن با Ctrl + V هم هست</span>
+            <button id="chooseButton" class="button button-primary" type="button">انتخاب تصویر</button>
+            <small>JPG · PNG · WEBP · BMP · حداکثر ۲۰ مگابایت</small>
+          </div>
+          <div id="previewWrap" class="preview-wrap" hidden>
+            <img id="previewImage" alt="پیش‌نمایش تصویر انتخاب‌شده">
+            <div class="preview-caption"><span id="imageName"></span><span id="imageDimensions"></span></div>
+          </div>
+        </div>
+
+        <div class="field-grid">
+          <div class="field"><label class="field-label" for="languageMode">زبان متن</label>
+            <select id="languageMode">
+              <option value="mixed" selected>فارسی + انگلیسی</option>
+              <option value="fas">فقط فارسی</option>
+              <option value="eng">فقط انگلیسی</option>
+            </select>
+          </div>
+          <div class="field"><label class="field-label" for="accuracyMode">روش تشخیص</label>
+            <select id="accuracyMode">
+              <option value="smart" selected>هوشمند؛ دو بار بررسی (دقیق‌تر، کندتر)</option>
+              <option value="quick">یک بار بررسی (سریع‌تر)</option>
+            </select>
+          </div>
+        </div>
+
+        <label class="check-option"><input id="normalizeText" type="checkbox" checked><span>یکسان‌سازی حروف فارسی «ي/ی» و «ك/ک» و رقم‌های عربی در متن</span></label>
+        <div class="button-row">
+          <button id="runButton" class="button button-primary" type="button" disabled>✦ استخراج متن</button>
+          <button id="clearButton" class="button button-quiet" type="button" disabled>پاک‌کردن تصویر</button>
+        </div>
+
+        <div id="progressArea" class="progress-area" hidden>
+          <div class="progress-heading"><span id="progressLabel">آماده‌سازی موتور…</span><b id="progressPercent"></b></div>
+          <div class="progress-track"><span id="progressFill"></span></div>
+          <p id="statusText" class="status-text"></p>
+        </div>
+
+        <div class="offline-box">
+          <div class="offline-title"><span class="offline-dot"></span><b>آماده‌سازی یک‌باره برای استفاده آفلاین</b></div>
+          <p>بار اول، موتور و فقط مدل زبان‌های انتخاب‌شده دریافت و در مرورگر ذخیره می‌شوند. مدل best-int نسخهٔ فشرده و عددی‌شدهٔ مدل Best است؛ حدود ۳ مگابایت برای هر زبان. اختلاف دقت آن با نسخهٔ حجیم معمولاً ناچیز تا کم است. پس از تکمیل، در همین مرورگر و همین آدرس بدون اینترنت هم کار می‌کند.</p>
+          <button id="prepareButton" class="button button-outline" type="button">آماده‌سازی برای استفاده آفلاین</button>
+          <small id="offlineStatus">برای ذخیرهٔ آفلاین، سایت باید روی HTTPS یا localhost باز شود.</small>
+        </div>
+      </article>
+
+      <article class="panel output-panel">
+        <div class="section-heading"><h2>۲. متن استخراج‌شده</h2><span id="confidenceBadge" class="confidence">اطمینان موتور: —</span></div>
+        <div id="emptyOutput" class="output-empty"><span>✎</span><b>متن اینجا نمایش داده می‌شود</b><small>پس از استخراج، می‌توانی متن را ویرایش کنی.</small></div>
+        <textarea id="resultText" dir="auto" spellcheck="false" placeholder="متن استخراج‌شده اینجا قرار می‌گیرد…" hidden></textarea>
+        <div id="alternativeRow" class="alternative-row" hidden>
+          <span>خروجی دیگر:</span>
+          <button id="showAlternativeButton" type="button" class="text-button">نمایش نتیجهٔ دوم</button>
+        </div>
+        <div class="result-footer"><span id="resultStats">۰ کلمه</span><span id="resultSource"></span></div>
+        <div class="button-row result-actions">
+          <button id="copyButton" class="button button-primary" type="button" disabled>کپی متن</button>
+          <button id="downloadButton" class="button button-quiet" type="button" disabled>دانلود TXT</button>
+        </div>
+        <p class="privacy-note">🔒 عکس در مرورگر خودت پردازش می‌شود و برای OCR به سرور ارسال نمی‌شود.</p>
+      </article>
+    </section>
+
+    <footer>مخصوص استخراج متن چاپی فارسی و انگلیسی؛ نه تشخیص تخصصی اعداد، فرمول‌ها یا دست‌خط.<br><span class="creator-credit">توسط حسین ثقفی</span></footer>
+  </main>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="./app.js" defer></script>
+</body>
+</html>

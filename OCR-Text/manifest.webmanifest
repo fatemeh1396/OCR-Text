@@ -1,0 +1,21 @@
+{
+  "id": "./",
+  "name": "OCR - استخراج متن",
+  "short_name": "OCR",
+  "description": "استخراج متن چاپی فارسی و انگلیسی از تصویر",
+  "lang": "fa",
+  "dir": "rtl",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#10131a",
+  "theme_color": "#171a22",
+  "icons": [
+    {
+      "src": "./assets/favicon/OCR.png",
+      "sizes": "any",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
