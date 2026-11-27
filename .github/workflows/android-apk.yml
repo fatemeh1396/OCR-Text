@@ -1,0 +1,67 @@
+name: Build Android APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main, master ]
+
+jobs:
+  build-apk:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - name: Install dependencies
+        run: npm install
+      - name: Check required app assets
+        run: |
+          test -s assets/favicon/OCR.png || (echo "Missing assets/favicon/OCR.png" && exit 1)
+          test -s assets/font/AradVF.ttf || (echo "Missing assets/font/AradVF.ttf" && exit 1)
+      - name: Bundle OCR engine and language models
+        run: node scripts/prepare-android-assets.mjs
+      - name: Verify downloaded OCR assets
+        run: node scripts/verify-android-assets.mjs source
+      - name: Stage web app
+        run: node scripts/build-web.mjs
+      - name: Verify staged web assets
+        run: node scripts/verify-android-assets.mjs web
+      - name: Prepare icon source images
+        run: |
+          cp assets/favicon/OCR.png assets/icon-only.png
+          cp assets/favicon/OCR.png assets/splash.png
+      - name: Generate Android project
+        run: npx cap add android
+      - name: Generate Android app icons
+        run: npx capacitor-assets generate --android
+      - name: Sync web app and native assets
+        run: npx cap sync android
+      - name: Ensure OCR runtime is inside Android APK assets
+        run: |
+          mkdir -p android/app/src/main/assets/public/assets
+          rm -rf android/app/src/main/assets/public/assets/ocr-runtime
+          cp -a www/assets/ocr-runtime android/app/src/main/assets/public/assets/ocr-runtime
+          node scripts/verify-android-assets.mjs android
+      - name: Build debug APK
+        working-directory: android
+        run: ./gradlew assembleDebug
+      - name: Verify OCR models are packaged in APK
+        run: |
+          APK="android/app/build/outputs/apk/debug/app-debug.apk"
+          test -s "$APK"
+          unzip -Z1 "$APK" | grep -Fx 'assets/public/assets/ocr-runtime/lang/fas.traineddata.gz'
+          unzip -Z1 "$APK" | grep -Fx 'assets/public/assets/ocr-runtime/lang/eng.traineddata.gz'
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: OCR-Text-Android-APK
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
