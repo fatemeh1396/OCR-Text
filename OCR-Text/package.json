@@ -5,7 +5,9 @@
   "description": "OCR - استخراج متن فارسی و انگلیسی",
   "scripts": {
     "android:sync": "cap sync android",
-    "android:open": "cap open android"
+    "android:open": "cap open android",
+    "prepare:android-assets": "node scripts/prepare-android-assets.mjs",
+    "verify:android-assets": "node scripts/verify-android-assets.mjs source"
   },
   "dependencies": {
     "@capacitor/android": "^7.4.3",

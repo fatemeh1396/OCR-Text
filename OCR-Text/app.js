@@ -5,7 +5,7 @@
 (function () {
   'use strict';
 
-  const APP_VERSION = '5.0.0-standalone';
+  const APP_VERSION = '5.0.1-standalone';
   const SHELL_CACHE = `ocr-shell-${APP_VERSION}`;
   const ASSET_CACHE = `ocr-assets-${APP_VERSION}`;
   const RUNTIME_SEGMENT = '__ocr_runtime__/';
@@ -358,8 +358,11 @@
         },
         errorHandler: error => console.error('OCR Tesseract:', error)
       };
-      if (state.swReady) workerOptions.langPath = runtimeAsset('lang');
-      else if (isNativeApp()) workerOptions.langPath = bundledRuntimeAsset('lang');
+      // Capacitor APKs must always prefer their packaged language files.
+      // A Service Worker may also be registered in Android WebView, but its
+      // virtual runtime path is not the APK's bundled assets directory.
+      if (isNativeApp()) workerOptions.langPath = bundledRuntimeAsset('lang');
+      else if (state.swReady) workerOptions.langPath = runtimeAsset('lang');
       state.worker = await Tesseract.createWorker(language, 1, workerOptions);
       state.workerLanguage = language;
       setBadge(ui.engineBadge, 'موتور آماده است', 'good');
@@ -612,7 +615,7 @@
           for (let index = 0; index < resources.length; index++) {
             const path = resources[index];
             const response = await fetch(bundledRuntimeAsset(path));
-            if (!response.ok) throw new Error(`فایل همراه برنامه پیدا نشد: ${path}. بستهٔ APK را دوباره بساز.`);
+            if (!response.ok) throw new Error(`فایل همراه برنامه پیدا نشد: ${path}. این APK مدل OCR را در خود ندارد؛ نسخهٔ جدید را از Artifact آخرین اجرای موفق GitHub Actions نصب کن.`);
             setProgress('بررسی فایل‌های همراه برنامه…', 12 + ((index + 1) / resources.length) * 58, `بررسی شد: ${path}`);
           }
         }
